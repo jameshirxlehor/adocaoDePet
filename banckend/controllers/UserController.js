@@ -142,6 +142,10 @@ module.exports = class UseController{
     }
 
 
+    static async editUser(req,res){
+        res.status(200).json({menssage: `Update realizado com sucesso!`});
+        return;
+    }
     
 
 
