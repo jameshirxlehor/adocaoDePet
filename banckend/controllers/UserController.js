@@ -67,10 +67,42 @@ module.exports = class UseController{
             await createUserToken(newUser,req,res);
         }catch(err){
 
-            res.status(500).json({menssage: `Usuário não registro: ${err}`});
+            res.status(500).json({menssage: `Usuário não registrado: ${err}`});
             
         }
-
-
     }
+
+
+    static async login(req,res){
+        const email = req.body.email;
+        const password = req.body.password;
+
+        if(!email){
+            res.status(422).json({menssage: `O e-mail é obrigatório`});
+            return;
+        }
+        if(!password){
+            res.status(422).json({menssage: `A senha é obrigatória`});
+            return;
+        }
+
+        //verificando se o usuário está cadastrado de fato no sistema
+        const user = await User.findOne({email: email});
+        if(!user){
+            res.status(422).json({menssage: `E-mail ou senha inserido está incorreto (200)`});
+            return;
+        }
+        
+        //verificando se a senha está correta, usando o bcrypt
+        const passwordCheck = await bcrypt.compare(password,user.password);
+        if(!passwordCheck){
+            res.status(422).json({menssage: `E-mail ou senha inserido está incorreto (201)`});
+            return;
+        }
+
+        await createUserToken(user,req,res);
+        
+    }
+
+
 }
