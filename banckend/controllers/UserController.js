@@ -132,7 +132,7 @@ module.exports = class UseController{
 
         const id = req.params.id;
 
-        const user = await User.findById(id);
+        const user = await User.findById(id).select("-password"); //retira o campo senha para segurança
 
         if(!user){
             res.status(422).json({menssage: `Usuário não encontrado`});
