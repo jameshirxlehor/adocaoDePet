@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 
 const createUserToken = require('../helpers/create_user_token');
 const getToken = require('../helpers/get_token');
+const getUserByToken = require('../helpers/get_user_by_token');
+
 
 module.exports = class UseController{
     
@@ -143,8 +145,78 @@ module.exports = class UseController{
 
 
     static async editUser(req,res){
-        res.status(200).json({menssage: `Update realizado com sucesso!`});
-        return;
+
+        // const id = req.params.id;
+        const { name, email, phone, password, confirmpassword } = req.body;
+        let image = '';
+
+        const token = getToken(req);
+        const user = await getUserByToken(token);
+
+
+        if(!name){
+            res.status(422).json({menssage: `O nome é obrigatório`});
+            return;
+        }
+        user.name = name;
+
+        if(!email){
+            res.status(422).json({menssage: `O e-mail é obrigatório`});
+            return;
+        }
+
+        const userExists = await User.findOne({email: email});
+
+        if(user.email !== email && userExists){
+
+            res.status(422).json({menssage: `Informe outro e-mail!`});
+            return;
+
+        }
+
+        user.email = email;
+
+
+        if(!phone){
+            res.status(422).json({menssage: `O telefone é obrigatório`});
+            return;
+        }
+
+        user.phone = phone;
+
+        //verificando se as senhas conferem
+        if (password != confirmpassword) {
+            res.status(422).json({ error: 'As senhas não conferem.' });
+            return;
+            // mudando senha
+        } else if (password == confirmpassword && password != null) {
+            // criando senha e inserindo no usuário
+            const salt = await bcrypt.genSalt(12);
+            const reqPassword = req.body.password;
+      
+            const passwordHash = await bcrypt.hash(reqPassword, salt);
+      
+            user.password = passwordHash;
+        }
+        
+        
+        try {
+            //atualizando de fato o usuário
+            await User.findOneAndUpdate(
+              { _id: user._id },
+              { $set: user },
+              { new: true },
+            )
+            res.status(200).json({menssage: `Usuário atualizado com sucesso!`});
+
+        } catch (error) {
+
+            res.status(500).json({ message: error });
+            return;
+        }
+        
+        
+        
     }
     
 
