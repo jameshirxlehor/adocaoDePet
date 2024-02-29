@@ -9,7 +9,7 @@ const UserController = require("../controllers/UserController");
 router.post("/register", UserController.register);
 router.post("/login", UserController.login);
 router.get("/checkuser", UserController.userCheck);
-// router.get("/:id", UserController.getUserById);
+router.get("/:id", UserController.getUserById);
 // router.patch("/edit/:id",verifyToken,imageUpload.single("image"),UserController.editUser);
 
 module.exports = router;
